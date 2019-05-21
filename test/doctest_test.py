@@ -9,5 +9,7 @@ import doctest
 
 from sureal.tools import misc
 
-def test_doctest():
-    doctest.testmod(misc)
+
+def load_tests(loader, tests, ignore):
+    tests.addTests(doctest.DocTestSuite(misc))
+    return tests

@@ -2,43 +2,50 @@ SUREAL - Subjective Recovery Analysis
 ===================
 [![Build Status](https://travis-ci.org/Netflix/sureal.svg?branch=master)](https://travis-ci.org/Netflix/sureal)
 
-SUREAL is a toolbox developed by Netflix for recovering quality scores from noisy measurements obtained by subjective tests. Read [this](resource/doc/dcc17v3.pdf) paper for some background. SUREAL has been incorporated in the [VMAF](https://github.com/Netflix/vmaf) package as a submodule.
+SUREAL is a toolbox developed by Netflix for recovering quality scores from noisy measurements obtained by subjective tests. Read [this](resource/doc/dcc17v3.pdf) paper for some background. SUREAL is being imported by the [VMAF](https://github.com/Netflix/vmaf) package.
+
+## Requirements
+
+- Python 2.7 or 3
+
+## Install through `pip`
+
+SUREAL is now available on [PyPI](https://pypi.org/project/sureal/), and can be installed through:
+
+```
+pip install sureal
+```
+
+To install locally, download the source and run:
+
+```
+pip install .
+```
 
 ## Prerequisites & Installation
 
-SUREAL requires a number of Python packages pre-installed:
+To use SUREAL from source, a number of packages are required:
 
   - [`numpy`](http://www.numpy.org/) (>=1.12.0)
   - [`scipy`](http://www.scipy.org/) (>=0.17.1)
   - [`matplotlib`](http://matplotlib.org/1.3.1/index.html) (>=2.0.0)
   - [`pandas`](http://pandas.pydata.org/) (>=0.19.2)
 
-First, upgrade `pip` to the newest version:
+Under Ubuntu, you may also need to install the `python-tk` or `python3-tk` packages via `apt`.
+
+First, upgrade `pip` to the newest version; then install the required Python packages:
 
 ```
 sudo -H pip install --upgrade pip
+pip install --user -r requirements.txt
 ```
 
-Then install the required Python packages:
+For Python 3, use:
 
 ```
-pip install --user numpy scipy matplotlib pandas
+sudo -H pip3 install --upgrade pip
+pip3 install --user -r requirements.txt
 ```
-
-Add the `python/src` subdirectories to the environment variable `PYTHONPATH`:
-
-```
-export PYTHONPATH="$(pwd)/python/src:$PYTHONPATH"
-```
-
-You can also add it to the environment permanently, by appending to `~/.bashrc`:
-
-```
-echo export PYTHONPATH="$(pwd)/python/src:$PYTHONPATH" >> ~/.bashrc
-source ~/.bashrc
-```
-
-Under macOS, use `~/.bash_profile` instead.
 
 ## Testing
 
@@ -50,10 +57,24 @@ The package has thus far been tested on Ubuntu 16.04 LTS and macOS 10.13. After 
 
 ## Usage in Command Line
 
-Under root directory, run `./run_subj` to print usage information:
+If you installed via Pip, run:
 
 ```
-usage: run_subj subjective_model dataset_filepath [--output-dir output_dir] [--print]
+sureal
+```
+
+If you have not installed via Pip, under root directory, just run:
+
+```
+python3 -m sureal
+```
+
+to run the module.
+
+This will print usage information:
+
+```
+usage: subjective_model dataset_filepath [--output-dir output_dir] [--print]
 ```
 
 If `--output-dir` is given, plots will be written to the output directory. If `--print` is enabled, output statistics will be printed on the command-line and / or the output directory.
@@ -61,8 +82,8 @@ If `--output-dir` is given, plots will be written to the output directory. If `-
 Below are two example usages:
 
 ```
-./run_subj MLE resource/dataset/NFLX_dataset_public_raw_last4outliers.py
-./run_subj MLE_CO resource/dataset/VQEGHD3_dataset_raw.py
+sureal MLE resource/dataset/NFLX_dataset_public_raw_last4outliers.py
+sureal MLE_CO resource/dataset/VQEGHD3_dataset_raw.py
 ```
 
 Here `subjective_model` are the available subjective models offered in the package, including:
@@ -129,6 +150,6 @@ The second way is more general, and can be used when the test is full sampling o
 
 Since partial sampling is allowed, it is not required that every subject ID is present in every `os` dictionary.
 
-## Usage in a Python Script
+## Example Script
 
-More examples of using the subjective models in a Python script can be found in [/python/script/run_subjective_models.py](/python/script/run_subjective_models.py). Run the script first to get a sense of what it does.
+See [here](https://colab.research.google.com/drive/1hG6ARc8-rihyJPxIXZysi-sAe0e7xxB8#scrollTo=onasQ091O3sn) for example script to use SUREAL in Google Colab notebook.

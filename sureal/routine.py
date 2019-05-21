@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from sureal.dataset_reader import RawDatasetReader
+from sureal.dataset_reader import RawDatasetReader, PairedCompDatasetReader
 from sureal.tools.misc import import_python_file, import_json_file
 
 __copyright__ = "Copyright 2016-2018, Netflix, Inc."
@@ -38,15 +38,13 @@ def run_subjective_models(dataset_filepath, subjective_model_classes, do_plot=No
         raise AssertionError("Unknown input type, must be .py or .json")
     dataset_reader = dataset_reader_class(dataset, input_dict=dataset_reader_info_dict)
 
-    subjective_models = map(
-        lambda subjective_model_class: subjective_model_class(dataset_reader),
-        subjective_model_classes
-    )
+    subjective_models = [
+        s(dataset_reader) for s in subjective_model_classes
+    ]
 
-    results = map(
-        lambda subjective_model: subjective_model.run_modeling(**kwargs),
-        subjective_models
-    )
+    results = [
+        s.run_modeling(**kwargs) for s in subjective_models
+    ]
 
     if do_plot == 'all' or 'raw_scores' in do_plot:
         # ===== plot raw scores
@@ -84,7 +82,10 @@ def run_subjective_models(dataset_filepath, subjective_model_classes, do_plot=No
                                 label=subjective_model.TYPE)
                 elif plot_type == 'errorbar':
                     if 'quality_scores_std' in result:
-                        quality_error = np.array(result['quality_scores_std']) * 1.96 # 95% C.I.
+                        try:
+                            quality_error = np.array(result['quality_scores_std']) * 1.96 # 95% C.I.
+                        except TypeError:
+                            quality_error = None
                         ax_quality.errorbar(np.array(xs)+shift_count*bar_width+0.2, quality,
                                             yerr=quality_error, fmt='.',
                                             color=colors[shift_count],
@@ -230,3 +231,23 @@ def run_subjective_models(dataset_filepath, subjective_model_classes, do_plot=No
         plt.tight_layout()
 
     return dataset, subjective_models, results
+
+
+def visualize_pc_dataset(dataset_filepath):
+
+    dataset = import_python_file(dataset_filepath)
+    dataset_reader = PairedCompDatasetReader(dataset)
+    tensor_pvs_pvs_subject = dataset_reader.opinion_score_3darray
+
+    plt.figure()
+    # plot the rate of winning x, 0 <= x <= 1.0, of one PVS compared against another PVS
+    mtx_pvs_pvs = np.nansum(tensor_pvs_pvs_subject, axis=2) \
+                  / (np.nansum(tensor_pvs_pvs_subject, axis=2) +
+                     np.nansum(tensor_pvs_pvs_subject, axis=2).transpose())
+    plt.imshow(mtx_pvs_pvs, interpolation='nearest')
+    plt.title(r'Paired Comparison Winning Rate')
+    plt.ylabel(r'PVS ($e$)')
+    plt.xlabel(r'PVS ($f$) [Compared Against]')
+    plt.set_cmap('jet')
+    plt.colorbar()
+    plt.tight_layout()
